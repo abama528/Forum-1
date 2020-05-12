@@ -3,32 +3,32 @@
     using System.Diagnostics;
     using System.Linq;
     using Forum.Data;
+    using Forum.Data.Common.Repositories;
+    using Forum.Data.Models;
     using Forum.Web.ViewModels;
     
     using Forum.Web.ViewModels.Home;
     using Microsoft.AspNetCore.Mvc;
+    using Forum.Services.Mapping;
+    using Forum.Services.Data;
 
     public class HomeController : BaseController
     {
-        public ApplicationDbContext db { get; }
+        
+        private readonly ICategoriesService categoriesService;
 
-        public HomeController(ApplicationDbContext db)
+        public HomeController(ICategoriesService categoriesService)
         {
-            this.db = db;
+            this.categoriesService = categoriesService;
         }
 
         public IActionResult Index()
         {
-            var viewModel = new IndexViewModel();
-            var categories = this.db.Categories.Select(x => new IndexCategoryViewModel
+            var viewModel = new IndexViewModel
             {
-                Description = x.Description,
-                ImageUrl = x.ImageUrl,
-                Name = x.Name,
-                Title = x.Title,
-
-            }).ToList();
-            viewModel.Categories = categories;
+                Categories =
+                this.categoriesService.GetAll<IndexCategoryViewModel>(),
+            };
             return this.View(viewModel);
         }
 
